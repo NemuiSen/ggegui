@@ -2,6 +2,11 @@
 name = "ggez-egui"
 version = "0.1.0"
 edition = "2018"
+authors = ["NemuiSen <nekonya.sen@gmail.com>"]
+license  = "MIT"
+repository = "https://github.com/NemuiSen/ggez-egui"
+keywords = ["ggez", "egui", "gui", "gamedev"]
+description = "A simple implementation of egui for ggez"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
