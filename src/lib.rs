@@ -49,7 +49,7 @@ impl EguiBackend {
 	}
 
 	/// Return an [`EguiContext`] for update the gui
-	pub fn get_context(&mut self) -> EguiContext {
+	pub fn ctx(&mut self) -> EguiContext {
 		self.context.begin_frame(self.input.raw.take());
 		EguiContext {
 			context: self.context.clone(),

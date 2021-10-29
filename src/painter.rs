@@ -6,14 +6,19 @@ use ggez::graphics;
 #[derive(Default, Clone)]
 pub struct Painter {
 	pub paint_jobs: Rc<RefCell<Vec<ClippedMesh>>>,
-	egui_texture: Option<graphics::Image>,
+	ggez_image: Option<graphics::Image>,
 	egui_texture_version: Option<u64>,
 }
 
 impl Painter {
 	pub fn draw(&mut self, ctx: &mut ggez::Context, egui_texture: &egui::Texture, scale_factor: f32) -> ggez::GameResult {
-		self.upload_egui_texture(ctx, egui_texture)?;
+		// upload egui texture
+		if self.egui_texture_version != Some(egui_texture.version) {
+			self.ggez_image = Some(egui_texture.into_image(ctx)?);
+			self.egui_texture_version = Some(egui_texture.version);
+		}
 
+		// drawing meshes
 		for egui::ClippedMesh(_clip_rect, egui_mesh) in self.paint_jobs.borrow_mut().as_slice() {
 			let vertices = egui_mesh.vertices.iter().map(|v| {
 				graphics::Vertex {
@@ -27,7 +32,7 @@ impl Painter {
 				ctx,
 				vertices.as_slice(),
 				egui_mesh.indices.as_slice(),
-				self.egui_texture.clone()
+				self.ggez_image.clone()
 			)?;
 
 			graphics::draw(
@@ -38,30 +43,26 @@ impl Painter {
 
 		Ok(())
 	}
-
-	fn upload_egui_texture(&mut self, ctx: &mut ggez::Context, egui_texture: &egui::Texture) -> ggez::GameResult {
-		if self.egui_texture_version == Some(egui_texture.version) {
-			return Ok(());
-		}
-		self.egui_texture = egui_texture_to_ggez(ctx, egui_texture)?;
-		self.egui_texture_version = Some(egui_texture.version);
-		Ok(())
-	}
 }
 
 // Generate ggez Image from egui Texture
-#[inline]
-pub fn egui_texture_to_ggez(ctx: &mut ggez::Context, egui_texture: &egui::Texture) -> ggez::GameResult<Option<graphics::Image>> {
-	let mut pixels: Vec<u8> = Vec::with_capacity(egui_texture.pixels.len() * 4);
+trait Image {
+	fn into_image(&self, ctx: &mut ggez::Context) -> ggez::GameResult<graphics::Image>;
+}
 
-	for srgba in egui_texture.srgba_pixels() {
-		pixels.extend(srgba.to_array());
+impl Image for egui::Texture {
+	fn into_image(&self, ctx: &mut ggez::Context) -> ggez::GameResult<graphics::Image> {
+		let mut pixels: Vec<u8> = Vec::with_capacity(self.pixels.len() * 4);
+
+		for pixel in self.srgba_pixels(1.0) {
+			pixels.extend(pixel.to_array());
+		}
+
+		graphics::Image::from_rgba8(
+			ctx, 
+			self.width  as u16,
+			self.height as u16,
+			pixels.as_slice()
+		)
 	}
-
-	Ok(Some(graphics::Image::from_rgba8(
-		ctx,
-		egui_texture.width  as u16,
-		egui_texture.height as u16,
-		pixels.as_slice()
-	)?))
 }

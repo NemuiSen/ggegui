@@ -19,7 +19,7 @@ impl State {
 
 impl EventHandler<ggez::GameError> for State {
 	fn update(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
-		let egui_ctx = self.egui_backend.get_context();
+		let egui_ctx = self.egui_backend.ctx();
 		egui::Window::new("egui-window").show(&egui_ctx, |ui| {
 			ui.group(|ui| {
 				ui.label("scale_factor");
@@ -83,7 +83,7 @@ impl EventHandler<ggez::GameError> for State {
 }
 
 fn main() -> ggez::GameResult {
-	let cb = ggez::ContextBuilder::new("game_id", "NemuiSen");
+	let cb = ggez::ContextBuilder::new("game_id", "author");
 	let (mut ctx, event_loop) = cb.build()?;
 	ggez::graphics::set_resizable(&mut ctx, true)?;
 	let state = State::new(&ctx);

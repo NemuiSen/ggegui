@@ -2,62 +2,58 @@
 # ggez_egui
 An [egui](https://github.com/emilk/egui/) implementation for the [ggez](https://ggez.rs/) game framework
 
-### basic project template
+## First steps
+To make use of this implementation you must first add the "EguiBackend" inside your game structure and initialize it. Ej:
 ```rust
-use ggez::{ContextBuilder, GameError, GameResult, event, graphics::{self, Color}};
-use ggez_egui::EguiBackend;
-
-fn main() -> GameResult {
-	let (ctx, event_loop) = ContextBuilder::new("game_id", "author")
-	.build()?;
-
-	let my_game = MyGame::new();
-
-	event::run(ctx, event_loop, my_game)
-}
-
 struct MyGame {
-	egui_backend: EguiBackend
+	egui_backend: EguiBackend,
+	...
 }
-
-impl MyGame {
-	fn new() -> Self {
-		Self {
-			egui_backend: EguiBackend::default()
-		}
-	}
+...
+let game = MyGame {
+	egui_backend: EguiBackend::default(), //or EguiBackend::new(ctx)
+	...
 }
+```
 
-impl event::EventHandler<GameError> for MyGame {
-	fn update(&mut self, ctx: &mut ggez::Context) -> Result<(), GameError> {
-		let egui_ctx = self.egui_backend.get_context();
+later, in the part of the "EventHandler", inside the "update" we will add the structure and logic of the ui, inside the "draw" we will send to draw the ui, and at the end we will detect the user input. Ej:
+```rust
+impl EventHandler<GameResult> for MyGame {
+	fn update(&mut self, ctx: &mut Context) -> GameResult {
+		let egui_ctx = self.egui_backend.ctx();
 		egui::Window::new("egui-window").show(&egui_ctx, |ui| {
 			ui.label("a very nice gui :3");
+			if ui.button("print \"hello world\"").clicked() {
+				println!("hello world");
+			}
 			if ui.button("quit").clicked() {
-				event::quit(ctx);
+				quit(ctx);
 			}
 		});
 		Ok(())
 	}
 
-	fn draw(&mut self, ctx: &mut ggez::Context) -> Result<(), GameError> {
-		graphics::clear(ctx, Color::BLACK);
-		graphics::draw(ctx, &self.egui_backend, ([0.0, 0.0],))?;
-		graphics::present(ctx)
+	fn draw(&mut self, ctx: &mut Context) -> GameResult {
+		clear(ctx, Color::BLACK);
+		draw(ctx, &self.egui_backend, ([0.0, 0.0],))?;
+		present(ctx)
 	}
 
-	fn mouse_button_down_event(&mut self, _ctx: &mut ggez::Context, button: event::MouseButton, _x: f32, _y: f32) {
+	// Input
+
+	fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
 		self.egui_backend.input.mouse_button_down_event(button);
 	}
 
-	fn mouse_button_up_event(&mut self, _ctx: &mut ggez::Context, button: event::MouseButton, _x: f32, _y: f32) {
+	fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
 		self.egui_backend.input.mouse_button_up_event(button);
 	}
 
-	fn mouse_motion_event(&mut self, _ctx: &mut ggez::Context, x: f32, y: f32, _dx: f32, _dy: f32) {
+	fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y: f32, _dx: f32, _dy: f32) {
 		self.egui_backend.input.mouse_motion_event(x, y);
 	}
 }
-
 ```
-there are a couple of examples to know how to use this implementation. 
+In this case we only handle the mouse input so we only use those three functions (mouse_button_down_event, mouse_button_up_event, mouse_motion_event), it is not very necessary to explain them because their names are already very descriptive. If we need to manage other things in the window such as the keyboard, the size, or even the scale factor, there are also respective functions for that, check out the [Input Documentation](https://docs.rs/ggez-egui/0.1.1/ggez_egui/struct.Input.html).
+
+there are a few [examples](./examples/) to know how to use this implementation.

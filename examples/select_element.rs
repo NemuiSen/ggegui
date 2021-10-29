@@ -59,13 +59,13 @@ struct State {
 
 impl EventHandler<ggez::GameError> for State {
 	fn update(&mut self, _ctx: &mut ggez::Context) -> ggez::GameResult {
-		let egui_ctx = self.egui_backend.get_context();
+		let egui_ctx = self.egui_backend.ctx();
 		egui::Window::new("Editor").show(&egui_ctx, |ui| {
 			ui.add(
 				egui::TextEdit::singleline(&mut self.curret_element).hint_text("put an id here")
 			);
 			let selected = self.elements.get(&self.curret_element).is_some() && !self.curret_element.is_empty();
-			if ui.add(egui::Button::new("add element").enabled(!selected)).clicked() {
+			if ui.add_enabled(!selected, egui::Button::new("add element")).clicked() {
 				self.elements.insert(self.curret_element.clone(), Element::default());
 				self.curret_element = String::new();
 			}
@@ -75,7 +75,7 @@ impl EventHandler<ggez::GameError> for State {
 				for (id, _element) in &elements.clone() {
 					ui.horizontal(|ui| {
 						let selected = self.curret_element == *id;
-						if ui.add(egui::Button::new("select").enabled(!selected)).clicked() {
+						if ui.add_enabled(!selected, egui::Button::new("select")).clicked() {
 							self.curret_element = (*id).clone();
 						}
 						if ui.button("remove").clicked() {
@@ -150,7 +150,7 @@ impl EventHandler<ggez::GameError> for State {
 }
 
 fn main() -> ggez::GameResult {
-	let cb = ContextBuilder::new("game_id", "NemuiSen");
+	let cb = ContextBuilder::new("game_id", "author");
 	let (ctx, events_loop) = cb.build()?;
 	let state = State::default();
 	run(ctx, events_loop, state);
