@@ -826,9 +826,9 @@ dependencies = [
 
 [[package]]
 name = "ggez"
-version = "0.6.1"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e11175a3fc1e377f57b14394a912c05970d8f679e3340e81663778a9a14b0b4"
+checksum = "c2481c5fcf83c5d51172850a3ee2ae36d86f9961d39851c6bec99108f87f085d"
 dependencies = [
  "approx",
  "bitflags",
@@ -858,7 +858,7 @@ dependencies = [
 
 [[package]]
 name = "ggez-egui"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "egui",
  "ggez",
@@ -919,9 +919,9 @@ dependencies = [
 
 [[package]]
 name = "glam"
-version = "0.17.3"
+version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e01732b97afd8508eee3333a541b9f7610f454bb818669e66e90f5f57c93a776"
+checksum = "68270e16582ea40f9c5b2fcd588fbc9cb696577222e04a64d9085cc314806a8a"
 dependencies = [
  "mint",
 ]
