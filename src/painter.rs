@@ -20,6 +20,8 @@ impl Painter {
 
 		// drawing meshes
 		for egui::ClippedMesh(_clip_rect, egui_mesh) in self.paint_jobs.borrow_mut().as_slice() {
+            if egui_mesh.vertices.len() < 3 { continue }
+
 			let vertices = egui_mesh.vertices.iter().map(|v| {
 				graphics::Vertex {
 					pos: [v.pos.x, v.pos.y],
