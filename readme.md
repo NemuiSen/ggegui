@@ -54,6 +54,6 @@ impl EventHandler<GameResult> for MyGame {
 	}
 }
 ```
-In this case we only handle the mouse input so we only use those three functions (mouse_button_down_event, mouse_button_up_event, mouse_motion_event), it is not very necessary to explain them because their names are already very descriptive. If we need to manage other things in the window such as the keyboard, the size, or even the scale factor, there are also respective functions for that, check out the [Input Documentation](https://docs.rs/ggez-egui/0.1.1/ggez_egui/struct.Input.html).
+In this case we only handle the mouse input so we only use those three functions (mouse_button_down_event, mouse_button_up_event, mouse_motion_event), it is not very necessary to explain them because their names are already very descriptive. If we need to manage other things in the window such as the keyboard, the size, or even the scale factor, there are also respective functions for that, check out the [Input Documentation](https://docs.rs/ggez-egui/latest/ggez_egui/struct.Input.html).
 
 there are a few [examples](./examples/) to know how to use this implementation.
