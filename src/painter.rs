@@ -11,7 +11,7 @@ pub struct Painter {
 }
 
 impl Painter {
-	pub fn draw(&mut self, ctx: &mut ggez::Context, egui_texture: &egui::Texture, scale_factor: f32) -> ggez::GameResult {
+	pub fn draw(&mut self, ctx: &mut ggez::Context, egui_texture: &egui::FontImage, scale_factor: f32) -> ggez::GameResult {
 		// upload egui texture
 		if self.egui_texture_version != Some(egui_texture.version) {
 			self.ggez_image = Some(egui_texture.into_image(ctx)?);
@@ -52,7 +52,7 @@ trait Image {
 	fn into_image(&self, ctx: &mut ggez::Context) -> ggez::GameResult<graphics::Image>;
 }
 
-impl Image for egui::Texture {
+impl Image for egui::FontImage {
 	fn into_image(&self, ctx: &mut ggez::Context) -> ggez::GameResult<graphics::Image> {
 		let mut pixels: Vec<u8> = Vec::with_capacity(self.pixels.len() * 4);
 

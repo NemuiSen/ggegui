@@ -72,7 +72,7 @@ impl Input {
 
 	/// lets you know the rotation of the mouse wheel
 	pub fn mouse_wheel_event(&mut self, x: f32, y: f32) {
-		self.raw.scroll_delta = vec2(x, y);
+		self.raw.events.push(egui::Event::Scroll(vec2(x, y)));
 	}
 
 	/// lets know the location of the mouse
