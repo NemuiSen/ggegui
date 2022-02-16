@@ -75,7 +75,7 @@ impl Drawable for EguiBackend {
 	/// }
 	/// ```
 	fn draw(&self, ctx: &mut ggez::Context, _param: ggez::graphics::DrawParam) -> ggez::GameResult {
-		self.painter.borrow_mut().draw(ctx, &self.context.texture(), self.input.scale_factor)
+		self.painter.borrow_mut().draw(ctx, &self.context.font_image(), self.input.scale_factor)
 	}
 
 	fn dimensions(&self, _ctx: &mut ggez::Context) -> Option<ggez::graphics::Rect> {

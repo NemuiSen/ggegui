@@ -1,6 +1,6 @@
 [package]
 name = "ggez-egui"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2018"
 authors = ["NemuiSen <nekonya.sen@gmail.com>"]
 license  = "MIT"
@@ -11,5 +11,5 @@ description = "A simple implementation of egui for ggez"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egui  = "0.15.0"
+egui  = "0.16"
 ggez = "0.7.0"
