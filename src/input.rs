@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use egui::{Key, PointerButton, Pos2, RawInput, pos2, vec2};
 use ggez::event::*;
 
@@ -5,6 +7,7 @@ use ggez::event::*;
 /// 
 /// such as the location of the mouse or the pressed keys
 pub struct Input {
+	dt: Instant,
 	pointer_pos: Pos2,
 	pub(crate) raw: RawInput,
 	pub(crate) scale_factor: f32,
@@ -14,6 +17,7 @@ impl Default for Input {
 	/// scale_factor: 1.0
 	fn default() -> Self {
 		Self {
+			dt: Instant::now(),
 			pointer_pos: Default::default(),
 			raw: Default::default(),
 			scale_factor: 1.0,
@@ -22,6 +26,12 @@ impl Default for Input {
 }
 
 impl Input {
+	pub(crate) fn take(&mut self) -> RawInput {
+		self.raw.predicted_dt = self.dt.elapsed().as_secs_f32();
+		self.dt = Instant::now();
+		self.raw.take()
+	}
+
 	/// Set the scale_factor and update the screen_rect
 	pub fn set_scale_factor(&mut self, scale_factor: f32, (w, h): (f32, f32)) {
 		self.scale_factor = scale_factor;

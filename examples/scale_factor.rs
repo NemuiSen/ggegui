@@ -32,6 +32,9 @@ impl EventHandler<ggez::GameError> for State {
 				});
 			});
 			ui.add(egui::TextEdit::multiline(&mut self.text).hint_text("text test:"));
+			if ui.button("print text test").clicked() {
+				println!("{}", self.text);
+			}
 			if ui.button("close button").clicked() {
 				quit(ctx);
 			}

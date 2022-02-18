@@ -50,7 +50,7 @@ impl EguiBackend {
 
 	/// Return an [`EguiContext`] for update the gui
 	pub fn ctx(&mut self) -> EguiContext {
-		self.context.begin_frame(self.input.raw.take());
+		self.context.begin_frame(self.input.take());
 		EguiContext {
 			context: self.context.clone(),
 			paint_jobs: self.painter.borrow().paint_jobs.clone(),
