@@ -1,6 +1,6 @@
 [package]
 name = "ggez-egui"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2018"
 authors = ["NemuiSen <nekonya.sen@gmail.com>"]
 license  = "MIT"
