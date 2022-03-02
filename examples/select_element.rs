@@ -1,7 +1,7 @@
 use std::{collections::HashMap, f32::consts::TAU};
 
 use ggez::{ContextBuilder, event::{EventHandler, run}, graphics::*};
-use ggez_egui::EguiBackend;
+use ggez_egui::{egui, EguiBackend};
 
 #[derive(Clone)]
 struct Element {

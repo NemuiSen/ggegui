@@ -1,5 +1,5 @@
 use ggez::{event::{EventHandler, quit, run}, graphics::*};
-use ggez_egui::EguiBackend;
+use ggez_egui::{egui, EguiBackend};
 
 struct State {
 	egui_backend: EguiBackend,

@@ -3,7 +3,7 @@ use ggez::{
 	event::*,
 	graphics::*
 };
-use ggez_egui::EguiBackend;
+use ggez_egui::{egui, EguiBackend};
 
 fn main() -> GameResult {
 	let (ctx, event_loop) = ContextBuilder::new("game_id", "author")

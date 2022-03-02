@@ -1,5 +1,5 @@
-use std::time::Instant;
-
+use std::time::Instant;
+
 use egui::{Key, PointerButton, Pos2, RawInput, pos2, vec2};
 use ggez::event::*;
 
