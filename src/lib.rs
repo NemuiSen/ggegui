@@ -6,6 +6,8 @@ use std::{cell::RefCell, ops::Deref, rc::Rc};
 use ggez::graphics::{self, Drawable};
 use egui::{ClippedMesh, CtxRef};
 
+pub use egui;
+
 /// Contains a copy of [`CtxRef`] and a mutable reference for the paint_jobs vector from [`Painter`].
 ///
 /// When is droped automatically will call [`CtxRef::end_frame`] function and update the paint_jobs
