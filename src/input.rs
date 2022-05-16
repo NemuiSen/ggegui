@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::{time::Instant, rc::Rc, cell::RefCell};
 
 use egui::{Key, PointerButton, Pos2, RawInput, pos2, vec2};
 use ggez::event::*;
@@ -11,6 +11,7 @@ pub struct Input {
 	pointer_pos: Pos2,
 	pub(crate) raw: RawInput,
 	pub(crate) scale_factor: f32,
+	pub clipboard: Rc<RefCell<String>>,
 }
 
 impl Default for Input {
@@ -21,6 +22,7 @@ impl Default for Input {
 			pointer_pos: Default::default(),
 			raw: Default::default(),
 			scale_factor: 1.0,
+			clipboard: Default::default()
 		}
 	}
 }
@@ -102,8 +104,9 @@ impl Input {
 			match keycode {
 				KeyCode::C => self.raw.events.push(egui::Event::Copy),
 				KeyCode::X => self.raw.events.push(egui::Event::Cut),
-				#[cfg(feature = "clipboard")]
-				KeyCode::V => unimplemented!(),
+				KeyCode::V => if !self.clipboard.borrow().is_empty() {
+					self.raw.events.push(egui::Event::Paste(self.clipboard.borrow().clone()));
+				},
 				_ =>  {
 					if let Some(key) = winit_to_egui_key_code(keycode) {
 						self.raw.events.push(egui::Event::Key {

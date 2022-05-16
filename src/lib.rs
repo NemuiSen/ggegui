@@ -4,20 +4,20 @@ pub use input::Input;
 use painter::Painter;
 use std::{cell::RefCell, ops::Deref, rc::Rc};
 use ggez::graphics::{self, Drawable};
-use egui::{ClippedMesh, CtxRef};
 
 pub use egui;
 
-/// Contains a copy of [`CtxRef`] and a mutable reference for the paint_jobs vector from [`Painter`].
+/// Contains a copy of [`egui::Context`] and a mutable reference for the paint_jobs vector from [`Painter`].
 ///
-/// When is droped automatically will call [`CtxRef::end_frame`] function and update the paint_jobs
+/// When is droped automatically will call [`egui::Context::end_frame`] function and update the paint_jobs
 pub struct EguiContext {
-	context: CtxRef,
-	paint_jobs: Rc<RefCell<Vec<ClippedMesh>>>,
+	context  : egui::Context,
+	painter  : Rc<RefCell<Painter>>,
+	clipboard: Rc<RefCell<String >>,
 }
 
 impl Deref for EguiContext {
-	type Target = CtxRef;
+	type Target = egui::Context;
 	fn deref(&self) -> &Self::Target {
 		&self.context
 	}
@@ -25,17 +25,27 @@ impl Deref for EguiContext {
 
 impl Drop for EguiContext {
 	fn drop(&mut self) {
-		let (_output, shapes) = self.context.end_frame();
-		*self.paint_jobs.borrow_mut() = self.context.tessellate(shapes);
+		let egui::FullOutput {
+			platform_output,
+			needs_repaint: _,
+			textures_delta,
+			shapes,
+		} = self.context.end_frame();
+
+		if !platform_output.copied_text.is_empty() {
+			*self.clipboard.borrow_mut() = platform_output.copied_text;
+		}
+		self.painter.borrow_mut().paint_jobs = self.context.tessellate(shapes);
+		self.painter.borrow_mut().textures_delta.push_front(textures_delta);
 	}
 }
 
 /// Contains and handles everything related to [`egui`]
 #[derive(Default)]
 pub struct EguiBackend {
-	context: CtxRef,
+	context: egui::Context,
 	pub input: Input,
-	painter: RefCell<Painter>,
+	painter: Rc<RefCell<Painter>>,
 }
 
 impl EguiBackend {
@@ -55,7 +65,8 @@ impl EguiBackend {
 		self.context.begin_frame(self.input.take());
 		EguiContext {
 			context: self.context.clone(),
-			paint_jobs: self.painter.borrow().paint_jobs.clone(),
+			painter: self.painter.clone(),
+			clipboard: self.input.clipboard.clone(),
 		}
 	}
 }
@@ -77,7 +88,7 @@ impl Drawable for EguiBackend {
 	/// }
 	/// ```
 	fn draw(&self, ctx: &mut ggez::Context, _param: ggez::graphics::DrawParam) -> ggez::GameResult {
-		self.painter.borrow_mut().draw(ctx, &self.context.font_image(), self.input.scale_factor)
+		self.painter.borrow_mut().draw(ctx, self.input.scale_factor)
 	}
 
 	fn dimensions(&self, _ctx: &mut ggez::Context) -> Option<ggez::graphics::Rect> {
