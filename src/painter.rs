@@ -19,6 +19,7 @@ impl Painter {
 		for egui::ClippedPrimitive { primitive, .. } in self.paint_jobs.as_slice() {
 			match primitive {
 				egui::epaint::Primitive::Mesh(mesh) => {
+					if mesh.vertices.len() < 3 { continue; }
 
 					let vertices = mesh.vertices.iter().map(|v| graphics::Vertex {
 						pos: [v.pos.x, v.pos.y],
