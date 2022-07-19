@@ -1,7 +1,13 @@
 use std::{time::Instant, rc::Rc, cell::RefCell};
 
 use egui::{Key, PointerButton, Pos2, RawInput, pos2, vec2};
-use ggez::event::*;
+use ggez::{
+	event::MouseButton,
+	input::keyboard::{
+		KeyCode,
+		KeyMods,
+	}
+};
 
 /// Contains and manages everything related to the [`egui`] input
 /// 
@@ -34,12 +40,62 @@ impl Input {
 		self.raw.take()
 	}
 
+	/// It updates egui of what is happening in the input (keys pressed, mouse position, etc), but it doesn't updates
+	/// the information of the pressed characters, to update that information you have to
+	/// use the function [text_input_event](Input:: text_input_event)
+	pub fn update(&mut self, ctx: &ggez::Context) {
+		/*======================= Keyboard =======================*/
+		for key in ctx.keyboard.pressed_keys() {
+			if ctx.keyboard.active_mods().contains(KeyMods::CTRL) {
+				match key {
+					KeyCode::C => self.raw.events.push(egui::Event::Copy),
+					KeyCode::X => self.raw.events.push(egui::Event::Cut),
+					KeyCode::V => unimplemented!("Pegar esta desimplementado temporalmente"),
+					_ => ()
+				}
+			}
+
+			if let Some(key) = translate_keycode(*key) {
+				self.raw.events.push(egui::Event::Key {
+					key,
+					pressed: true,
+					modifiers: translate_modifier(ctx.keyboard.active_mods())
+				})
+			}
+		}
+
+		/*======================= Mouse =======================*/
+		for button in [MouseButton::Left, MouseButton::Middle, MouseButton::Right] {
+			if ctx.mouse.button_pressed(button) {
+				self.raw.events.push(egui::Event::PointerButton {
+					button: match button {
+						MouseButton::Left => PointerButton::Primary,
+						MouseButton::Right => PointerButton::Secondary,
+						MouseButton::Middle => PointerButton::Middle,
+						_ => unreachable!()
+					},
+					pos: self.pointer_pos,
+					pressed: true,
+					modifiers: translate_modifier(ctx.keyboard.active_mods())
+				});
+			}
+		}
+
+		if ctx.mouse.delta() != [0.0, 0.0].into() {
+			let ggez::mint::Point2 { x, y } = ctx.mouse.position();
+			self.pointer_pos = pos2(
+				x / self.scale_factor,
+				y / self.scale_factor
+			);
+			self.raw.events.push(egui::Event::PointerMoved(self.pointer_pos));
+		}
+	}
+
 	/// Set the scale_factor and update the screen_rect
 	pub fn set_scale_factor(&mut self, scale_factor: f32, (w, h): (f32, f32)) {
 		self.scale_factor = scale_factor;
 		self.raw.pixels_per_point = Some(scale_factor);
 		self.resize_event(w, h);
-		
 	}
 
 	/// Update screen_rect data with window size
@@ -50,82 +106,9 @@ impl Input {
 		));
 	}
 
-	/*======================= Mouse =======================*/
-
-	/// lets know which key is pressed on the mouse
-	pub fn mouse_button_down_event(&mut self, button: MouseButton) {
-		self.raw.events.push(egui::Event::PointerButton {
-			button: match button {
-				MouseButton::Left => PointerButton::Primary,
-				MouseButton::Right => PointerButton::Secondary,
-				MouseButton::Middle => PointerButton::Middle,
-				_ => unreachable!()
-			},
-			modifiers: Default::default(),
-			pos: self.pointer_pos,
-			pressed: true
-		});
-	}
-
-	/// lets know which key was released on the mouse
-	pub fn mouse_button_up_event(&mut self, button: MouseButton) {
-		self.raw.events.push(egui::Event::PointerButton {
-			button: match button {
-				MouseButton::Left => PointerButton::Primary,
-				MouseButton::Right => PointerButton::Secondary,
-				MouseButton::Middle => PointerButton::Middle,
-				_ => unreachable!()
-			},
-			modifiers: Default::default(),
-			pos: self.pointer_pos,
-			pressed: false
-		});
-	}
-
 	/// lets you know the rotation of the mouse wheel
 	pub fn mouse_wheel_event(&mut self, x: f32, y: f32) {
 		self.raw.events.push(egui::Event::Scroll(vec2(x, y)));
-	}
-
-	/// lets know the location of the mouse
-	pub fn mouse_motion_event(&mut self, x: f32, y: f32) {
-		self.pointer_pos = pos2(
-			x / self.scale_factor,
-			y / self.scale_factor
-		);
-		self.raw.events.push(egui::Event::PointerMoved(self.pointer_pos));
-	}
-
-	/*======================= Keyboard =======================*/
-
-	/// lets know which key is pressed on the keyboard
-	pub fn key_down_event(&mut self, keycode: KeyCode, keymods: KeyMods) {
-		if keymods.intersects(KeyMods::CTRL) {
-			match keycode {
-				KeyCode::C => self.raw.events.push(egui::Event::Copy),
-				KeyCode::X => self.raw.events.push(egui::Event::Cut),
-				KeyCode::V => if !self.clipboard.borrow().is_empty() {
-					self.raw.events.push(egui::Event::Paste(self.clipboard.borrow().clone()));
-				},
-				_ =>  {
-					if let Some(key) = winit_to_egui_key_code(keycode) {
-						self.raw.events.push(egui::Event::Key {
-							key,
-							pressed: true,
-							modifiers: ggez_to_egui_modifiers(keymods),
-						});
-					}
-				}
-			}
-		} else {
-			if let Some(key) = winit_to_egui_key_code(keycode) {
-				self.raw.events.push(egui::Event::Key {
-					key,
-					pressed: true,
-					modifiers: ggez_to_egui_modifiers(keymods),
-				});
-			}
-		}
 	}
 
 	/// lets know what character is pressed on the keyboard
@@ -137,7 +120,7 @@ impl Input {
 }
 
 #[inline]
-fn winit_to_egui_key_code(key: KeyCode) -> Option<egui::Key> {
+fn translate_keycode(key: KeyCode) -> Option<egui::Key> {
 	Some(match key {
 		KeyCode::Escape => Key::Escape,
 		KeyCode::Insert => Key::Insert,
@@ -168,20 +151,22 @@ fn winit_to_egui_key_code(key: KeyCode) -> Option<egui::Key> {
 }
 
 #[inline]
-fn ggez_to_egui_modifiers(keymods: KeyMods) -> egui::Modifiers {
+fn translate_modifier(keymods: KeyMods) -> egui::Modifiers {
 	egui::Modifiers {
-        alt: keymods.intersects(KeyMods::ALT),
-        ctrl: keymods.intersects(KeyMods::CTRL),
-        shift: keymods.intersects(KeyMods::SHIFT),
-        #[cfg(target_os = "macos")]
-        mac_cmd: keymods.intersects(KeyMods::LOGO),
-        #[cfg(target_os = "macos")]
-        command: keymods.intersects(KeyMods::LOGO),
-        #[cfg(not(target_os = "macos"))]
-        mac_cmd: false,
-        #[cfg(not(target_os = "macos"))]
-        command: keymods.intersects(KeyMods::CTRL),
-    }
+		alt: keymods.intersects(KeyMods::ALT),
+		ctrl: keymods.intersects(KeyMods::CTRL),
+		shift: keymods.intersects(KeyMods::SHIFT),
+
+		#[cfg(not(target_os = "macos"))]
+		mac_cmd: false,
+		#[cfg(not(target_os = "macos"))]
+		command: keymods.intersects(KeyMods::CTRL),
+
+		#[cfg(target_os = "macos")]
+		mac_cmd: keymods.intersects(KeyMods::LOGO),
+		#[cfg(target_os = "macos")]
+		command: keymods.intersects(KeyMods::LOGO),
+	}
 }
 
 #[inline]

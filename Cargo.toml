@@ -1,7 +1,7 @@
 [package]
 name = "ggez-egui"
 version = "0.2.1"
-edition = "2018"
+edition = "2021"
 authors = ["NemuiSen <nekonya.sen@gmail.com>"]
 license  = "MIT"
 repository = "https://github.com/NemuiSen/ggez-egui"
@@ -12,4 +12,4 @@ description = "A simple implementation of egui for ggez"
 
 [dependencies]
 egui = "0.18.1"
-ggez = "0.7.0"
+ggez = "0.8.0-rc0"

@@ -4,52 +4,65 @@ use ggez::graphics;
 
 #[derive(Default, Clone)]
 pub struct Painter {
-	pub(crate) paint_jobs: Vec<egui::ClippedPrimitive>,
+	pub(crate) shapes: Vec<egui::ClippedPrimitive>,
 	pub(crate) textures_delta: LinkedList<egui::TexturesDelta>,
+	paint_jobs: Vec<(egui::TextureId, graphics::Mesh)>,
 	textures: HashMap<egui::TextureId, graphics::Image>,
 }
 
 impl Painter {
-	pub fn draw(&mut self, ctx: &mut ggez::Context, scale_factor: f32) -> ggez::GameResult {
+	pub fn draw(&mut self, canvas: &mut graphics::Canvas, scale_factor: f32) {
+		for (id, mesh) in self.paint_jobs.iter() {
+			canvas.draw(
+				mesh,
+				graphics::DrawParam::default().scale([scale_factor, scale_factor])
+			);
+			/*canvas.draw_textured_mesh(
+				mesh.clone(),
+				self.textures[&id].clone(),
+				graphics::DrawParam::default().scale([scale_factor, scale_factor])
+			);*/
+		}
+		self.paint_jobs.clear();
+	}
+
+	pub fn update(&mut self, ctx: &mut ggez::Context) {
 		// Create and free textures
 		if let Some(textures_delta) = self.textures_delta.pop_front() {
-			self.update_textures(ctx, textures_delta)?;
+			self.update_textures(ctx, textures_delta);
 		}
-		// drawing meshes
-		for egui::ClippedPrimitive { primitive, .. } in self.paint_jobs.as_slice() {
+
+		// generating meshes
+		for egui::ClippedPrimitive { primitive, .. } in self.shapes.iter() {
 			match primitive {
 				egui::epaint::Primitive::Mesh(mesh) => {
 					if mesh.vertices.len() < 3 { continue; }
 
 					let vertices = mesh.vertices.iter().map(|v| graphics::Vertex {
-						pos: [v.pos.x, v.pos.y],
+						position: [v.pos.x, v.pos.y],
 						uv: [v.uv.x, v.uv.y],
-						color: egui::Rgba::from(v.color).to_array(),
+						color: egui::Rgba::from(v.color).to_array()
 					}).collect::<Vec<_>>();
 
-					let ggez_mesh = graphics::Mesh::from_raw(
-						ctx,
-						vertices.as_slice(),
-						mesh.indices.as_slice(),
-						self.textures.get(&mesh.texture_id).map(|t| t.clone())
-					)?;
-
-					graphics::draw(
-						ctx, &ggez_mesh,
-						graphics::DrawParam::default().scale([scale_factor, scale_factor])
-					)?;
-				}
+					self.paint_jobs.push((
+						mesh.texture_id,
+						graphics::Mesh::from_data(
+							ctx,
+							graphics::MeshData {
+								vertices: vertices.as_slice(),
+								indices: mesh.indices.as_slice()
+							}
+						)
+					));
+				},
 				egui::epaint::Primitive::Callback(_) => {
 					panic!("Custom rendering callbacks are not implemented yet");
 				}
 			}
-
 		}
-
-		Ok(())
 	}
 
-	pub fn update_textures(&mut self, ctx: &mut ggez::Context, textures_delta: egui::TexturesDelta) -> ggez::GameResult {
+	pub fn update_textures(&mut self, ctx: &mut ggez::Context, textures_delta: egui::TexturesDelta) {
 		// set textures
 		for (id, delta) in &textures_delta.set {
 			let image = match &delta.image {
@@ -59,7 +72,7 @@ impl Painter {
 				egui::ImageData::Font(image) => {
 					image.into_image(ctx)
 				}
-			}?;
+			};
 
 			self.textures.insert(*id, image);
 		}
@@ -68,18 +81,16 @@ impl Painter {
 		for id in &textures_delta.free {
 			self.textures.remove(id);
 		}
-
-		Ok(())
 	}
 }
 
 // Generate ggez Image from egui Texture
 trait Image {
-	fn into_image(&self, ctx: &mut ggez::Context) -> ggez::GameResult<graphics::Image>;
+	fn into_image(&self, ctx: &mut ggez::Context) -> graphics::Image;
 }
 
 impl Image for egui::ColorImage {
-	fn into_image(&self, ctx: &mut ggez::Context) -> ggez::GameResult<graphics::Image> {
+	fn into_image(&self, ctx: &mut ggez::Context) -> graphics::Image {
 		assert_eq!(
 			self.width() * self.height(),
 			self.pixels.len(),
@@ -92,17 +103,18 @@ impl Image for egui::ColorImage {
 			pixels.extend(pixel.to_array());
 		}
 
-		graphics::Image::from_rgba8(
+		graphics::Image::from_pixels(
 			ctx,
-			self.width() as u16,
-			self.height() as u16,
-			pixels.as_slice()
+			pixels.as_slice(),
+			graphics::ImageFormat::Rgba8UnormSrgb,
+			self.width() as u32,
+			self.height() as u32
 		)
 	}
 }
 
 impl Image for egui::FontImage {
-	fn into_image(&self, ctx: &mut ggez::Context) -> ggez::GameResult<graphics::Image> {
+	fn into_image(&self, ctx: &mut ggez::Context) -> graphics::Image {
 		assert_eq!(
 			self.width() * self.height(),
 			self.pixels.len(),
@@ -116,11 +128,12 @@ impl Image for egui::FontImage {
 			pixels.extend(pixel.to_array());
 		}
 
-		graphics::Image::from_rgba8(
+		graphics::Image::from_pixels(
 			ctx, 
-			self.width()  as u16,
-			self.height() as u16,
-			pixels.as_slice()
+			pixels.as_slice(),
+			graphics::ImageFormat::Rgba8UnormSrgb,
+			self.width() as u32,
+			self.height() as u32,
 		)
 	}
 }

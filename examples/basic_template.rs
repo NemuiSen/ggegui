@@ -1,7 +1,6 @@
 use ggez::{
 	*,
 	event::*,
-	graphics::*
 };
 use ggez_egui::{egui, EguiBackend};
 
@@ -29,27 +28,20 @@ impl EventHandler<GameError> for MyGame {
 				println!("hello world");
 			}
 			if ui.button("quit").clicked() {
-				quit(ctx);
+				request_quit(ctx);
 			}
 		});
+		self.egui_backend.update(ctx);
 		Ok(())
 	}
 
 	fn draw(&mut self, ctx: &mut Context) -> GameResult {
-		clear(ctx, Color::BLACK);
-		draw(ctx, &self.egui_backend, ([0.0, 0.0],))?;
-		present(ctx)
-	}
-
-	fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
-		self.egui_backend.input.mouse_button_down_event(button);
-	}
-
-	fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
-		self.egui_backend.input.mouse_button_up_event(button);
-	}
-
-	fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y: f32, _dx: f32, _dy: f32) {
-		self.egui_backend.input.mouse_motion_event(x, y);
+		let mut canvas = graphics::Canvas::from_frame(
+			ctx,
+			graphics::CanvasLoadOp::Clear([0.1, 0.1, 0.1, 1.0].into())
+		);
+		canvas.draw(&self.egui_backend, graphics::DrawParam::default());
+		canvas.finish(ctx)
 	}
 }
+

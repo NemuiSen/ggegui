@@ -35,7 +35,7 @@ impl Drop for EguiContext {
 		if !platform_output.copied_text.is_empty() {
 			*self.clipboard.borrow_mut() = platform_output.copied_text;
 		}
-		self.painter.borrow_mut().paint_jobs = self.context.tessellate(shapes);
+		self.painter.borrow_mut().shapes = self.context.tessellate(shapes);
 		self.painter.borrow_mut().textures_delta.push_front(textures_delta);
 	}
 }
@@ -52,12 +52,17 @@ impl EguiBackend {
 	/// Create a [`EguiBackend`] with extra information for use the [`Input::set_scale_factor`]
 	pub fn new(ctx: &ggez::Context) -> Self {
 		let mut input = Input::default();
-		let (w, h) = graphics::size(ctx);
+		let (w, h) = ctx.gfx.size();
 		input.set_scale_factor(1.0, (w, h));
 		Self {
 			input,
 			..Default::default()
 		}
+	}
+
+	pub fn update(&mut self, ctx: &mut ggez::Context) {
+		self.input.update(ctx);
+		self.painter.borrow_mut().update(ctx);
 	}
 
 	/// Return an [`EguiContext`] for update the gui
@@ -87,17 +92,11 @@ impl Drawable for EguiBackend {
 	/// 	...
 	/// }
 	/// ```
-	fn draw(&self, ctx: &mut ggez::Context, _param: ggez::graphics::DrawParam) -> ggez::GameResult {
-		self.painter.borrow_mut().draw(ctx, self.input.scale_factor)
+	fn draw(&self, canvas: &mut graphics::Canvas, _param: graphics::DrawParam) {
+		self.painter.borrow_mut().draw(canvas, self.input.scale_factor);
 	}
 
-	fn dimensions(&self, _ctx: &mut ggez::Context) -> Option<ggez::graphics::Rect> {
-		None
+	fn dimensions(&self, _gfx: &mut impl ggez::context::HasMut<graphics::GraphicsContext>) -> Option<graphics::Rect> {
+	    None
 	}
-
-	fn blend_mode(&self) -> Option<ggez::graphics::BlendMode> {
-		None
-	}
-
-	fn set_blend_mode(&mut self, _mode: Option<ggez::graphics::BlendMode>) {}
 }
