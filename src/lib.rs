@@ -3,7 +3,7 @@ mod painter;
 pub use input::Input;
 use painter::Painter;
 use std::{cell::RefCell, ops::Deref, rc::Rc};
-use ggez::graphics::{self, Drawable};
+use ggez::{graphics::{self, Drawable, Canvas, DrawParam, GraphicsContext}, context::Has};
 
 pub use egui;
 
@@ -27,9 +27,9 @@ impl Drop for EguiContext {
 	fn drop(&mut self) {
 		let egui::FullOutput {
 			platform_output,
-			needs_repaint: _,
 			textures_delta,
 			shapes,
+			repaint_after: _,
 		} = self.context.end_frame();
 
 		if !platform_output.copied_text.is_empty() {
@@ -92,11 +92,11 @@ impl Drawable for EguiBackend {
 	/// 	...
 	/// }
 	/// ```
-	fn draw(&self, canvas: &mut graphics::Canvas, _param: graphics::DrawParam) {
+	fn draw(&self, canvas: &mut Canvas, _param: impl Into<DrawParam>) {
 		self.painter.borrow_mut().draw(canvas, self.input.scale_factor);
 	}
 
-	fn dimensions(&self, _gfx: &mut impl ggez::context::HasMut<graphics::GraphicsContext>) -> Option<graphics::Rect> {
+	fn dimensions(&self, _gfx: &impl Has<GraphicsContext>) -> Option<graphics::Rect> {
 	    None
 	}
 }

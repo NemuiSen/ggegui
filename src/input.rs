@@ -78,6 +78,19 @@ impl Input {
 					pressed: true,
 					modifiers: translate_modifier(ctx.keyboard.active_mods())
 				});
+			} 
+			else {
+				self.raw.events.push(egui::Event::PointerButton {
+					button: match button {
+						MouseButton::Left => PointerButton::Primary,
+						MouseButton::Right => PointerButton::Secondary,
+						MouseButton::Middle => PointerButton::Middle,
+						_ => unreachable!()
+					},
+					pos: self.pointer_pos,
+					pressed: false,
+					modifiers: translate_modifier(ctx.keyboard.active_mods())
+				});
 			}
 		}
 

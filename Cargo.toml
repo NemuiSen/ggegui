@@ -11,5 +11,5 @@ description = "A simple implementation of egui for ggez"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egui = "0.18.1"
-ggez = "0.8.0-rc0"
+egui = "0.20.1"
+ggez = "0.8.1"
