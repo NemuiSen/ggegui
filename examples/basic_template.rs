@@ -4,17 +4,12 @@ use ggez::event::{self, EventHandler};
 use ggez_egui::{EguiBackend, egui};
 
 fn main() {
-    // Make a Context.
     let (mut ctx, event_loop) = ContextBuilder::new("game_id", "author")
         .build()
         .expect("FATAL - Failed to create the window.s");
 
-    // Create an instance of your event handler.
-    // Usually, you should provide it with the Context object to
-    // use when setting your game up.
     let my_game = MyGame::new(&mut ctx);
 
-    // Run!
     event::run(ctx, event_loop, my_game);
 }
 
@@ -24,7 +19,6 @@ struct MyGame {
 
 impl MyGame {
     pub fn new(_ctx: &mut Context) -> MyGame {
-        // Load/create resources such as images here.
         MyGame {
             egui_backend: EguiBackend::new(_ctx),
         }
