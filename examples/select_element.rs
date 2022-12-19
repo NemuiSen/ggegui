@@ -39,17 +39,17 @@ impl Drawable for Element {
 	}
 
 	fn dimensions(&self, _gfx: &impl Has<GraphicsContext>) -> Option<graphics::Rect> {
-	    None
+		None
 	}
 }
 
 fn main() {
-    let (ctx, event_loop) = ContextBuilder::new("game_id", "author")
-        .build()
-        .expect("FATAL - Failed to create the window.s");
+	let (ctx, event_loop) = ContextBuilder::new("game_id", "author")
+		.build()
+		.expect("FATAL - Failed to create the window.s");
 
-    let my_game = MyGame::default();
-    event::run(ctx, event_loop, my_game);
+	let my_game = MyGame::default();
+	event::run(ctx, event_loop, my_game);
 }
 
 #[derive(Default)]
@@ -120,11 +120,11 @@ impl EventHandler<ggez::GameError> for MyGame {
 
 	fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
 		let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
-        for (_, element) in &self.elements {
+		for (_, element) in &self.elements {
 			canvas.draw(element, DrawParam::default());
 		}
 		canvas.draw(&self.egui_backend, DrawParam::default());
-        canvas.finish(ctx)
+		canvas.finish(ctx)
 	}
 
 	fn text_input_event(&mut self, _ctx: &mut ggez::Context, character: char) -> Result<(), GameError> {

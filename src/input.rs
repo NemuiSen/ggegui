@@ -184,9 +184,9 @@ fn translate_modifier(keymods: KeyMods) -> egui::Modifiers {
 
 #[inline]
 fn is_printable(chr: char) -> bool {
-    let is_in_private_use_area = '\u{e000}' <= chr && chr <= '\u{f8ff}'
-        || '\u{f0000}' <= chr && chr <= '\u{ffffd}'
-        || '\u{100000}' <= chr && chr <= '\u{10fffd}';
+	let is_in_private_use_area = '\u{e000}' <= chr && chr <= '\u{f8ff}'
+		|| '\u{f0000}' <= chr && chr <= '\u{ffffd}'
+		|| '\u{100000}' <= chr && chr <= '\u{10fffd}';
 
-    !is_in_private_use_area && !chr.is_ascii_control()
+	!is_in_private_use_area && !chr.is_ascii_control()
 }

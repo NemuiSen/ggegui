@@ -97,6 +97,6 @@ impl Drawable for EguiBackend {
 	}
 
 	fn dimensions(&self, _gfx: &impl Has<GraphicsContext>) -> Option<graphics::Rect> {
-	    None
+		None
 	}
 }

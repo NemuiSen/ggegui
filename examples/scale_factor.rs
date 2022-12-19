@@ -4,32 +4,32 @@ use ggez::event::{self, EventHandler};
 use ggez_egui::{EguiBackend, egui};
 
 fn main() {
-    let (mut ctx, event_loop) = ContextBuilder::new("game_id", "author")
-        .build()
-        .expect("FATAL - Failed to create the window.");
-    let my_game = MyGame::new(&mut ctx);
+	let (mut ctx, event_loop) = ContextBuilder::new("game_id", "author")
+		.build()
+		.expect("FATAL - Failed to create the window.");
+	let my_game = MyGame::new(&mut ctx);
 
-    event::run(ctx, event_loop, my_game);
+	event::run(ctx, event_loop, my_game);
 }
 
 struct MyGame {
-    egui_backend: EguiBackend,
-    scale_factor: f32
+	egui_backend: EguiBackend,
+	scale_factor: f32
 }
 
 impl MyGame {
-    pub fn new(_ctx: &mut Context) -> MyGame {
-        MyGame {
-            egui_backend: EguiBackend::new(_ctx),
-            scale_factor: 1.0
-        }
-    }
+	pub fn new(_ctx: &mut Context) -> MyGame {
+		MyGame {
+			egui_backend: EguiBackend::new(_ctx),
+			scale_factor: 1.0
+		}
+	}
 }
 
 impl EventHandler for MyGame {
-    fn update(&mut self, ctx: &mut Context) -> GameResult {
+	fn update(&mut self, ctx: &mut Context) -> GameResult {
 
-        let egui_ctx = self.egui_backend.ctx();
+		let egui_ctx = self.egui_backend.ctx();
 
 		egui::Window::new("egui-window").show(&egui_ctx, |ui| {
 			ui.group(|ui| {
@@ -51,14 +51,14 @@ impl EventHandler for MyGame {
 			}
 		});
 
-        self.egui_backend.update(ctx);
-        
-        Ok(())
-    }
+		self.egui_backend.update(ctx);
+		
+		Ok(())
+	}
 
-    fn draw(&mut self, ctx: &mut Context) -> GameResult {
-        let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
-        canvas.draw(&self.egui_backend, DrawParam::default().dest(glam::vec2(0.0, 0.0)));
-        canvas.finish(ctx)
-    }
+	fn draw(&mut self, ctx: &mut Context) -> GameResult {
+		let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
+		canvas.draw(&self.egui_backend, DrawParam::default().dest(glam::vec2(0.0, 0.0)));
+		canvas.finish(ctx)
+	}
 }
