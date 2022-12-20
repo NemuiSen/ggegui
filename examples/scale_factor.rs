@@ -1,94 +1,64 @@
-use ggez::{event::{EventHandler, quit, run}, graphics::*};
-use ggez_egui::{egui, EguiBackend};
+use ggez::{Context, ContextBuilder, GameResult, glam};
+use ggez::graphics::{self, Color, DrawParam};
+use ggez::event::{self, EventHandler};
+use ggez_egui::{EguiBackend, egui};
 
-struct State {
-	egui_backend: EguiBackend,
-	scale_factor: f32,
-	text: String,
+fn main() {
+	let (mut ctx, event_loop) = ContextBuilder::new("game_id", "author")
+		.build()
+		.expect("FATAL - Failed to create the window.");
+	let my_game = MyGame::new(&mut ctx);
+
+	event::run(ctx, event_loop, my_game);
 }
 
-impl State {
-	fn new(ctx: &ggez::Context) -> Self {
-		Self {
-			egui_backend: EguiBackend::new(ctx),
-			scale_factor: 1.0,
-			text: String::new(),
+struct MyGame {
+	egui_backend: EguiBackend,
+	scale_factor: f32
+}
+
+impl MyGame {
+	pub fn new(_ctx: &mut Context) -> MyGame {
+		MyGame {
+			egui_backend: EguiBackend::new(_ctx),
+			scale_factor: 1.0
 		}
 	}
 }
 
-impl EventHandler<ggez::GameError> for State {
-	fn update(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
+impl EventHandler for MyGame {
+	fn update(&mut self, ctx: &mut Context) -> GameResult {
+
 		let egui_ctx = self.egui_backend.ctx();
+
 		egui::Window::new("egui-window").show(&egui_ctx, |ui| {
 			ui.group(|ui| {
 				ui.label("scale_factor");
 				ui.horizontal(|ui| {
 					ui.add(egui::Slider::new(&mut self.scale_factor, 0.5..=1.5));
 					if ui.button("update scale_factor").clicked() {
-						let (w, h) = size(ctx);
+						let (w, h) = ctx.gfx.size();
 						self.egui_backend.input.set_scale_factor(self.scale_factor, (w, h));
 					}
 				});
 			});
-			ui.add(egui::TextEdit::multiline(&mut self.text).hint_text("text test:"));
+			ui.add(egui::TextEdit::multiline(&mut "Test!").hint_text("text test:"));
 			if ui.button("print text test").clicked() {
-				println!("{}", self.text);
+				println!("Test!");
 			}
 			if ui.button("close button").clicked() {
-				quit(ctx);
+				ctx.request_quit();
 			}
 		});
+
+		self.egui_backend.update(ctx);
+		
 		Ok(())
 	}
 
-	fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
-		clear(ctx, Color::BLACK);
-		let mesh = MeshBuilder::new().rectangle(
-			DrawMode::fill(),
-			Rect::new(300.0, 300.0, 100.0, 100.0),
-			Color::WHITE
-		)?.build(ctx)?;
-		draw(ctx, &mesh, DrawParam::default())?;
-		draw(ctx, &self.egui_backend, ([0.0, 0.0],))?;
-		present(ctx)
+	fn draw(&mut self, ctx: &mut Context) -> GameResult {
+		let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
+		canvas.draw(&self.egui_backend, DrawParam::default().dest(glam::vec2(0.0, 0.0)));
+		canvas.finish(ctx)
 	}
-
-	fn resize_event(&mut self, ctx: &mut ggez::Context, width: f32, height: f32) {	
-		self.egui_backend.input.resize_event(width, height);
-		let rect = ggez::graphics::Rect::new(0.0, 0.0, width, height);
-		ggez::graphics::set_screen_coordinates(ctx, rect).unwrap();
-	}
-
-	fn mouse_button_up_event(&mut self, _ctx: &mut ggez::Context, button: ggez::event::MouseButton, _x: f32, _y: f32) {
-		self.egui_backend.input.mouse_button_up_event(button);
-	}
-
-	fn mouse_button_down_event(&mut self, _ctx: &mut ggez::Context, button: ggez::event::MouseButton, _x: f32, _y: f32) {
-		self.egui_backend.input.mouse_button_down_event(button);
-	}
-
-	fn mouse_wheel_event(&mut self, _ctx: &mut ggez::Context, x: f32, y: f32) {
-		self.egui_backend.input.mouse_wheel_event(x, y);
-	}
-
-	fn mouse_motion_event(&mut self, _ctx: &mut ggez::Context, x: f32, y: f32, _dx: f32, _dy: f32) {
-		self.egui_backend.input.mouse_motion_event(x, y);
-	}
-
-	fn key_down_event(&mut self, _ctx: &mut ggez::Context, keycode: ggez::event::KeyCode, keymods: ggez::event::KeyMods, _repeat: bool) {
-		self.egui_backend.input.key_down_event(keycode, keymods);
-	}
-
-	fn text_input_event(&mut self, _ctx: &mut ggez::Context, character: char) {
-		self.egui_backend.input.text_input_event(character);
-	}
-}
-
-fn main() -> ggez::GameResult {
-	let cb = ggez::ContextBuilder::new("game_id", "author");
-	let (mut ctx, event_loop) = cb.build()?;
-	ggez::graphics::set_resizable(&mut ctx, true)?;
-	let state = State::new(&ctx);
-	run(ctx, event_loop, state);
 }

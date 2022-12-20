@@ -13,15 +13,11 @@ pub struct Painter {
 impl Painter {
 	pub fn draw(&mut self, canvas: &mut graphics::Canvas, scale_factor: f32) {
 		for (id, mesh) in self.paint_jobs.iter() {
-			canvas.draw(
-				mesh,
-				graphics::DrawParam::default().scale([scale_factor, scale_factor])
-			);
-			/*canvas.draw_textured_mesh(
+			canvas.draw_textured_mesh(
 				mesh.clone(),
 				self.textures[&id].clone(),
 				graphics::DrawParam::default().scale([scale_factor, scale_factor])
-			);*/
+			);
 		}
 		self.paint_jobs.clear();
 	}
@@ -124,7 +120,7 @@ impl Image for egui::FontImage {
 		let mut pixels: Vec<u8> = Vec::with_capacity(self.pixels.len() * 4);
 
 		let gamma = 1.0;
-		for pixel in self.srgba_pixels(gamma) {
+		for pixel in self.srgba_pixels(Some(gamma)) {
 			pixels.extend(pixel.to_array());
 		}
 
