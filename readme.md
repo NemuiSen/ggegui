@@ -30,6 +30,7 @@ impl EventHandler<GameResult> for MyGame {
 				quit(ctx);
 			}
 		});
+		self.egui_backend.update(ctx); // Update the input with the data from the context with exceptions (scale_factor, resize, mouse_wheel, and text_input)
 		Ok(())
 	}
 
@@ -37,20 +38,6 @@ impl EventHandler<GameResult> for MyGame {
 		clear(ctx, Color::BLACK);
 		draw(ctx, &self.egui_backend, ([0.0, 0.0],))?;
 		present(ctx)
-	}
-
-	// Input
-
-	fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
-		self.egui_backend.input.mouse_button_down_event(button);
-	}
-
-	fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
-		self.egui_backend.input.mouse_button_up_event(button);
-	}
-
-	fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y: f32, _dx: f32, _dy: f32) {
-		self.egui_backend.input.mouse_motion_event(x, y);
 	}
 }
 ```
