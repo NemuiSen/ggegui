@@ -12,3 +12,5 @@ jobs:
     steps:
     - name: rust-rustfmt-check
       uses: mbrobbel/rustfmt-check@0.5.0
+      with:
+          token: ${{ secrets.GITHUB_TOKEN }}
