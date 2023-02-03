@@ -11,6 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: dtolnay/rust-toolchain@stable
-    - uses: mbrobbel/rustfmt-check@5.0.0
+    - uses: mbrobbel/rustfmt-check@0.5.0
       with:
           token: ${{ secrets.GITHUB_TOKEN }}
