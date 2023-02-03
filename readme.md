@@ -1,5 +1,5 @@
-[![crates.io](https://img.shields.io/crates/v/ggegui)](https://crates.io/crates/ggez-egui)
-[![docs.rs](https://img.shields.io/docsrs/ggez-egui)](https://docs.rs/ggez-egui/)
+[![crates.io](https://img.shields.io/crates/v/ggegui)](https://crates.io/crates/ggegui)
+[![docs.rs](https://img.shields.io/docsrs/ggegui)](https://docs.rs/ggegui/)
 # ggez_egui
 An [egui](https://github.com/emilk/egui/) implementation for the [ggez](https://ggez.rs/) game framework
 
