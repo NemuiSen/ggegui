@@ -1,6 +1,6 @@
 use std::{collections::HashMap, f32::consts::TAU};
 use ggez::{ContextBuilder, event::{EventHandler, self}, graphics::{*, self}, context::Has, Context, GameError};
-use ggez_egui::{egui, EguiBackend};
+use ggegui::{egui, Gui};
 
 #[derive(Clone)]
 struct Element {
@@ -54,15 +54,15 @@ fn main() {
 
 #[derive(Default)]
 struct MyGame {
-	egui_backend: EguiBackend,
+	gui: Gui,
 	elements: HashMap<String, Element>,
 	curret_element: String,
 }
 
 impl EventHandler<ggez::GameError> for MyGame {
 	fn update(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
-		let egui_ctx = self.egui_backend.ctx();
-		egui::Window::new("Editor").show(&egui_ctx, |ui| {
+		let gui_ctx = self.gui.ctx();
+		egui::Window::new("Editor").show(&gui_ctx, |ui| {
 			ui.add(
 				egui::TextEdit::singleline(&mut self.curret_element).hint_text("put an id here")
 			);
@@ -114,7 +114,7 @@ impl EventHandler<ggez::GameError> for MyGame {
 				});
 			}
 		});
-		self.egui_backend.update(ctx);
+		self.gui.update(ctx);
 		Ok(())
 	}
 
@@ -123,12 +123,12 @@ impl EventHandler<ggez::GameError> for MyGame {
 		for (_, element) in &self.elements {
 			canvas.draw(element, DrawParam::default());
 		}
-		canvas.draw(&self.egui_backend, DrawParam::default());
+		canvas.draw(&self.gui, DrawParam::default());
 		canvas.finish(ctx)
 	}
 
 	fn text_input_event(&mut self, _ctx: &mut ggez::Context, character: char) -> Result<(), GameError> {
-		self.egui_backend.input.text_input_event(character);
+		self.gui.input.text_input_event(character);
 		Ok(())
 	}
 }

@@ -1,36 +1,31 @@
-use ggez::{Context, ContextBuilder, GameResult, glam};
-use ggez::graphics::{self, Color, DrawParam};
 use ggez::event::{self, EventHandler};
-use ggez_egui::{EguiBackend, egui};
+use ggez::graphics::{self, Color, DrawParam};
+use ggez::{glam, Context, ContextBuilder, GameResult};
+use ggegui::{egui, Gui};
 
 fn main() {
-	let (mut ctx, event_loop) = ContextBuilder::new("game_id", "author")
-		.build()
-		.expect("FATAL - Failed to create the window.s");
-
-	let my_game = MyGame::new(&mut ctx);
-
-	event::run(ctx, event_loop, my_game);
+	let (mut ctx, event_loop) = ContextBuilder::new("game_id", "author").build().unwrap();
+	let state = State::new(&mut ctx);
+	event::run(ctx, event_loop, state);
 }
 
-struct MyGame {
-	egui_backend: EguiBackend,
+struct State {
+	gui: Gui,
 }
 
-impl MyGame {
-	pub fn new(_ctx: &mut Context) -> MyGame {
-		MyGame {
-			egui_backend: EguiBackend::new(_ctx),
+impl State {
+	pub fn new(ctx: &mut Context) -> Self {
+		Self {
+			gui: Gui::new(ctx),
 		}
 	}
 }
 
-impl EventHandler for MyGame {
+impl EventHandler for State {
 	fn update(&mut self, ctx: &mut Context) -> GameResult {
+		let gui_ctx = self.gui.ctx();
 
-		let egui_ctx = self.egui_backend.ctx();
-
-		egui::Window::new("egui-window").show(&egui_ctx, |ui| {
+		egui::Window::new("UI").show(&gui_ctx, |ui| {
 			ui.label("a very nice gui :3");
 			if ui.button("print \"hello world\"").clicked() {
 				println!("hello world");
@@ -39,15 +34,16 @@ impl EventHandler for MyGame {
 				ctx.request_quit();
 			}
 		});
-
-		self.egui_backend.update(ctx);
-		
+		self.gui.update(ctx);
 		Ok(())
 	}
 
 	fn draw(&mut self, ctx: &mut Context) -> GameResult {
 		let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
-		canvas.draw(&self.egui_backend, DrawParam::default().dest(glam::vec2(0.0, 0.0)));
+		canvas.draw(
+			&self.gui,
+			DrawParam::default().dest(glam::Vec2::ZERO),
+		);
 		canvas.finish(ctx)
 	}
 }

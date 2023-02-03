@@ -1,23 +1,19 @@
-use std::{time::Instant, rc::Rc, cell::RefCell};
+use std::time::Instant;
 
-use egui::{Key, PointerButton, Pos2, RawInput, pos2, vec2};
+use egui::{pos2, vec2, Key, PointerButton, Pos2, RawInput};
 use ggez::{
 	event::MouseButton,
-	input::keyboard::{
-		KeyCode,
-		KeyMods,
-	}
+	input::keyboard::{KeyCode, KeyMods},
 };
 
 /// Contains and manages everything related to the [`egui`] input
-/// 
+///
 /// such as the location of the mouse or the pressed keys
 pub struct Input {
 	dt: Instant,
 	pointer_pos: Pos2,
 	pub(crate) raw: RawInput,
 	pub(crate) scale_factor: f32,
-	pub clipboard: Rc<RefCell<String>>,
 }
 
 impl Default for Input {
@@ -28,7 +24,6 @@ impl Default for Input {
 			pointer_pos: Default::default(),
 			raw: Default::default(),
 			scale_factor: 1.0,
-			clipboard: Default::default()
 		}
 	}
 }
@@ -46,25 +41,22 @@ impl Input {
 	pub fn update(&mut self, ctx: &ggez::Context) {
 		/*======================= Keyboard =======================*/
 		for key in ctx.keyboard.pressed_keys() {
-			if ctx.keyboard.active_mods().contains(KeyMods::CTRL) {
-				match key {
-					KeyCode::C => self.raw.events.push(egui::Event::Copy),
-					KeyCode::X => self.raw.events.push(egui::Event::Cut),
-					KeyCode::V => unimplemented!("Pegar esta desimplementado temporalmente"),
-					_ => ()
-				}
-			}
-
 			if let Some(key) = translate_keycode(*key) {
 				self.raw.events.push(egui::Event::Key {
 					key,
 					pressed: true,
-					modifiers: translate_modifier(ctx.keyboard.active_mods())
+					modifiers: translate_modifier(ctx.keyboard.active_mods()),
 				})
 			}
 		}
 
 		/*======================= Mouse =======================*/
+		let ggez::mint::Point2 { x, y } = ctx.mouse.position();
+		self.pointer_pos = pos2(x / self.scale_factor, y / self.scale_factor);
+		self.raw
+			.events
+			.push(egui::Event::PointerMoved(self.pointer_pos));
+
 		for button in [MouseButton::Left, MouseButton::Middle, MouseButton::Right] {
 			if ctx.mouse.button_pressed(button) {
 				self.raw.events.push(egui::Event::PointerButton {
@@ -72,35 +64,25 @@ impl Input {
 						MouseButton::Left => PointerButton::Primary,
 						MouseButton::Right => PointerButton::Secondary,
 						MouseButton::Middle => PointerButton::Middle,
-						_ => unreachable!()
+						_ => unreachable!(),
 					},
 					pos: self.pointer_pos,
 					pressed: true,
-					modifiers: translate_modifier(ctx.keyboard.active_mods())
+					modifiers: translate_modifier(ctx.keyboard.active_mods()),
 				});
-			} 
-			else {
+			} else {
 				self.raw.events.push(egui::Event::PointerButton {
 					button: match button {
 						MouseButton::Left => PointerButton::Primary,
 						MouseButton::Right => PointerButton::Secondary,
 						MouseButton::Middle => PointerButton::Middle,
-						_ => unreachable!()
+						_ => unreachable!(),
 					},
 					pos: self.pointer_pos,
 					pressed: false,
-					modifiers: translate_modifier(ctx.keyboard.active_mods())
+					modifiers: translate_modifier(ctx.keyboard.active_mods()),
 				});
 			}
-		}
-
-		if ctx.mouse.delta() != [0.0, 0.0].into() {
-			let ggez::mint::Point2 { x, y } = ctx.mouse.position();
-			self.pointer_pos = pos2(
-				x / self.scale_factor,
-				y / self.scale_factor
-			);
-			self.raw.events.push(egui::Event::PointerMoved(self.pointer_pos));
 		}
 	}
 

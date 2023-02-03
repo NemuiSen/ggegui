@@ -16,7 +16,7 @@ impl Painter {
 			canvas.draw_textured_mesh(
 				mesh.clone(),
 				self.textures[&id].clone(),
-				graphics::DrawParam::default().scale([scale_factor, scale_factor])
+				graphics::DrawParam::default().scale([scale_factor, scale_factor]),
 			);
 		}
 		self.paint_jobs.clear();
@@ -32,13 +32,19 @@ impl Painter {
 		for egui::ClippedPrimitive { primitive, .. } in self.shapes.iter() {
 			match primitive {
 				egui::epaint::Primitive::Mesh(mesh) => {
-					if mesh.vertices.len() < 3 { continue; }
+					if mesh.vertices.len() < 3 {
+						continue;
+					}
 
-					let vertices = mesh.vertices.iter().map(|v| graphics::Vertex {
-						position: [v.pos.x, v.pos.y],
-						uv: [v.uv.x, v.uv.y],
-						color: egui::Rgba::from(v.color).to_array()
-					}).collect::<Vec<_>>();
+					let vertices = mesh
+						.vertices
+						.iter()
+						.map(|v| graphics::Vertex {
+							position: [v.pos.x, v.pos.y],
+							uv: [v.uv.x, v.uv.y],
+							color: egui::Rgba::from(v.color).to_array(),
+						})
+						.collect::<Vec<_>>();
 
 					self.paint_jobs.push((
 						mesh.texture_id,
@@ -46,11 +52,11 @@ impl Painter {
 							ctx,
 							graphics::MeshData {
 								vertices: vertices.as_slice(),
-								indices: mesh.indices.as_slice()
-							}
-						)
+								indices: mesh.indices.as_slice(),
+							},
+						),
 					));
-				},
+				}
 				egui::epaint::Primitive::Callback(_) => {
 					panic!("Custom rendering callbacks are not implemented yet");
 				}
@@ -58,16 +64,16 @@ impl Painter {
 		}
 	}
 
-	pub fn update_textures(&mut self, ctx: &mut ggez::Context, textures_delta: egui::TexturesDelta) {
+	pub fn update_textures(
+		&mut self,
+		ctx: &mut ggez::Context,
+		textures_delta: egui::TexturesDelta,
+	) {
 		// set textures
 		for (id, delta) in &textures_delta.set {
 			let image = match &delta.image {
-				egui::ImageData::Color(image) => {
-					image.into_image(ctx)
-				}
-				egui::ImageData::Font(image) => {
-					image.into_image(ctx)
-				}
+				egui::ImageData::Color(image) => color_to_image(image, ctx),
+				egui::ImageData::Font(image) => font_to_image(image, ctx),
 			};
 
 			self.textures.insert(*id, image);
@@ -80,56 +86,49 @@ impl Painter {
 	}
 }
 
-// Generate ggez Image from egui Texture
-trait Image {
-	fn into_image(&self, ctx: &mut ggez::Context) -> graphics::Image;
+// Generate Image from egui ColorImage
+fn color_to_image(color: &egui::ColorImage, ctx: &mut ggez::Context) -> graphics::Image {
+	assert_eq!(
+		color.width() * color.height(),
+		color.pixels.len(),
+		"Mismatch between texture size and texel count"
+	);
+
+	let mut pixels: Vec<u8> = Vec::with_capacity(color.pixels.len() * 4);
+
+	for pixel in &color.pixels {
+		pixels.extend(pixel.to_array());
+	}
+
+	graphics::Image::from_pixels(
+		ctx,
+		pixels.as_slice(),
+		graphics::ImageFormat::Rgba8UnormSrgb,
+		color.width() as u32,
+		color.height() as u32,
+	)
 }
 
-impl Image for egui::ColorImage {
-	fn into_image(&self, ctx: &mut ggez::Context) -> graphics::Image {
-		assert_eq!(
-			self.width() * self.height(),
-			self.pixels.len(),
-			"Mismatch between texture size and texel count"
-		);
+// Generate Image from egui FontImage
+fn font_to_image(font: &egui::FontImage, ctx: &mut ggez::Context) -> graphics::Image {
+	assert_eq!(
+		font.width() * font.height(),
+		font.pixels.len(),
+		"Mismatch between texture size and texel count"
+	);
 
-		let mut pixels: Vec<u8> = Vec::with_capacity(self.pixels.len() * 4);
+	let mut pixels: Vec<u8> = Vec::with_capacity(font.pixels.len() * 4);
 
-		for pixel in &self.pixels {
-			pixels.extend(pixel.to_array());
-		}
-
-		graphics::Image::from_pixels(
-			ctx,
-			pixels.as_slice(),
-			graphics::ImageFormat::Rgba8UnormSrgb,
-			self.width() as u32,
-			self.height() as u32
-		)
+	let gamma = 1.0;
+	for pixel in font.srgba_pixels(Some(gamma)) {
+		pixels.extend(pixel.to_array());
 	}
-}
 
-impl Image for egui::FontImage {
-	fn into_image(&self, ctx: &mut ggez::Context) -> graphics::Image {
-		assert_eq!(
-			self.width() * self.height(),
-			self.pixels.len(),
-			"Mismatch between texture size and texel count"
-		);
-
-		let mut pixels: Vec<u8> = Vec::with_capacity(self.pixels.len() * 4);
-
-		let gamma = 1.0;
-		for pixel in self.srgba_pixels(Some(gamma)) {
-			pixels.extend(pixel.to_array());
-		}
-
-		graphics::Image::from_pixels(
-			ctx, 
-			pixels.as_slice(),
-			graphics::ImageFormat::Rgba8UnormSrgb,
-			self.width() as u32,
-			self.height() as u32,
-		)
-	}
+	graphics::Image::from_pixels(
+		ctx,
+		pixels.as_slice(),
+		graphics::ImageFormat::Rgba8UnormSrgb,
+		font.width() as u32,
+		font.height() as u32,
+	)
 }
