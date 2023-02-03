@@ -1,13 +1,18 @@
-use std::{collections::HashMap, f32::consts::TAU};
-use ggez::{ContextBuilder, event::{EventHandler, self}, graphics::{*, self}, context::Has, Context, GameError};
 use ggegui::{egui, Gui};
+use ggez::{
+	context::Has,
+	event::{self, EventHandler},
+	graphics::{self, *},
+	Context, ContextBuilder, GameError,
+};
+use std::{collections::HashMap, f32::consts::TAU};
 
 #[derive(Clone)]
 struct Element {
 	pos: [f32; 2],
 	size: [f32; 2],
 	angle: f32,
-	mesh: Mesh
+	mesh: Mesh,
 }
 
 impl Element {
@@ -20,8 +25,9 @@ impl Element {
 				ctx,
 				DrawMode::fill(),
 				Rect::new(-1.0, -1.0, 1.0, 1.0),
-				Color::WHITE
-			).unwrap()
+				Color::WHITE,
+			)
+			.unwrap(),
 		}
 	}
 }
@@ -31,10 +37,10 @@ impl Drawable for Element {
 		canvas.draw(
 			&self.mesh,
 			DrawParam::default()
-			.dest(self.pos)
-			.offset([-0.5, -0.5])
-			.scale(self.size)
-			.rotation(self.angle)
+				.dest(self.pos)
+				.offset([-0.5, -0.5])
+				.scale(self.size)
+				.rotation(self.angle),
 		)
 	}
 
@@ -64,11 +70,16 @@ impl EventHandler<ggez::GameError> for MyGame {
 		let gui_ctx = self.gui.ctx();
 		egui::Window::new("Editor").show(&gui_ctx, |ui| {
 			ui.add(
-				egui::TextEdit::singleline(&mut self.curret_element).hint_text("put an id here")
+				egui::TextEdit::singleline(&mut self.curret_element).hint_text("put an id here"),
 			);
-			let selected = self.elements.get(&self.curret_element).is_some() && !self.curret_element.is_empty();
-			if ui.add_enabled(!selected, egui::Button::new("add element")).clicked() {
-				self.elements.insert(self.curret_element.clone(), Element::new(ctx));
+			let selected = self.elements.get(&self.curret_element).is_some()
+				&& !self.curret_element.is_empty();
+			if ui
+				.add_enabled(!selected, egui::Button::new("add element"))
+				.clicked()
+			{
+				self.elements
+					.insert(self.curret_element.clone(), Element::new(ctx));
 				self.curret_element = String::new();
 			}
 
@@ -77,7 +88,10 @@ impl EventHandler<ggez::GameError> for MyGame {
 				for (id, _element) in &elements.clone() {
 					ui.horizontal(|ui| {
 						let selected = self.curret_element == *id;
-						if ui.add_enabled(!selected, egui::Button::new("select")).clicked() {
+						if ui
+							.add_enabled(!selected, egui::Button::new("select"))
+							.clicked()
+						{
 							self.curret_element = (*id).clone();
 						}
 						if ui.button("remove").clicked() {
@@ -108,7 +122,9 @@ impl EventHandler<ggez::GameError> for MyGame {
 						});
 						ui.group(|ui| {
 							ui.label("angle");
-							ui.add(egui::Slider::new(&mut element.angle, 0.0..=TAU).prefix("angle: "));
+							ui.add(
+								egui::Slider::new(&mut element.angle, 0.0..=TAU).prefix("angle: "),
+							);
 						});
 					}
 				});
@@ -127,7 +143,11 @@ impl EventHandler<ggez::GameError> for MyGame {
 		canvas.finish(ctx)
 	}
 
-	fn text_input_event(&mut self, _ctx: &mut ggez::Context, character: char) -> Result<(), GameError> {
+	fn text_input_event(
+		&mut self,
+		_ctx: &mut ggez::Context,
+		character: char,
+	) -> Result<(), GameError> {
 		self.gui.input.text_input_event(character);
 		Ok(())
 	}

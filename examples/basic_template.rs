@@ -1,7 +1,7 @@
+use ggegui::{egui, Gui};
 use ggez::event::{self, EventHandler};
 use ggez::graphics::{self, Color, DrawParam};
 use ggez::{glam, Context, ContextBuilder, GameResult};
-use ggegui::{egui, Gui};
 
 fn main() {
 	let (mut ctx, event_loop) = ContextBuilder::new("game_id", "author").build().unwrap();
@@ -15,9 +15,7 @@ struct State {
 
 impl State {
 	pub fn new(ctx: &mut Context) -> Self {
-		Self {
-			gui: Gui::new(ctx),
-		}
+		Self { gui: Gui::new(ctx) }
 	}
 }
 
@@ -40,10 +38,7 @@ impl EventHandler for State {
 
 	fn draw(&mut self, ctx: &mut Context) -> GameResult {
 		let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
-		canvas.draw(
-			&self.gui,
-			DrawParam::default().dest(glam::Vec2::ZERO),
-		);
+		canvas.draw(&self.gui, DrawParam::default().dest(glam::Vec2::ZERO));
 		canvas.finish(ctx)
 	}
 }
