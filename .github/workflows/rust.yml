@@ -6,14 +6,11 @@ on:
   pull_request:
     branches: [ "master" ]
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
-  build:
-
-    runs-on: windows-latest
-
+  format:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: mbrobbel/rustfmt-check@master
+      with:
+          token: ${{ secrets.GITHUB_TOKEN }}
