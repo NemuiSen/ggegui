@@ -6,17 +6,29 @@ An [egui](https://github.com/emilk/egui/) implementation for the [ggez](https://
 ## Ultra minimal example
 ```rust
 use ggegui::{egui, Gui};
+use ggez::{
+	ContextBuilder, Context, GameResult, glam,
+	event::{ self, EventHandler}, 
+	graphics::{ self, DrawParam, Color }
+};
+
+fn main() {
+	let (mut ctx, event_loop) = ContextBuilder::new("game_id", "author").build().unwrap();
+	let state = State::new(&mut ctx);
+	event::run(ctx, event_loop, state);
+}
+
 struct State {
 	gui: Gui,
-}
+} 
 
 impl State {
 	pub fn new(ctx: &mut Context) -> Self {
-		Self {
+		Self { 
 			gui: Gui::new(ctx),
 		}
-	}
-}
+	} 
+} 
 
 impl EventHandler for State {
 	fn update(&mut self, ctx: &mut Context) -> GameResult {
@@ -35,7 +47,7 @@ impl EventHandler for State {
 	fn draw(&mut self, ctx: &mut Context) -> GameResult {
 		let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
 		canvas.draw(
-			&self.egui_backend,
+			&self.gui, 
 			DrawParam::default().dest(glam::Vec2::ZERO),
 		);
 		canvas.finish(ctx)
