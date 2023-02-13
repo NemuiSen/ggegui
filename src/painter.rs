@@ -24,7 +24,7 @@ impl Painter {
 
 	pub fn update(&mut self, ctx: &mut ggez::Context) {
 		// Create and free textures
-		if let Some(textures_delta) = self.textures_delta.pop_front() {
+		while let Some(textures_delta) = self.textures_delta.pop_front() {
 			self.update_textures(ctx, textures_delta);
 		}
 
