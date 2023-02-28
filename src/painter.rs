@@ -6,19 +6,21 @@ use ggez::graphics;
 pub struct Painter {
 	pub(crate) shapes: Vec<egui::ClippedPrimitive>,
 	pub(crate) textures_delta: LinkedList<egui::TexturesDelta>,
-	paint_jobs: Vec<(egui::TextureId, graphics::Mesh)>,
+	paint_jobs: Vec<(egui::TextureId, graphics::Mesh, graphics::Rect)>,
 	textures: HashMap<egui::TextureId, graphics::Image>,
 }
 
 impl Painter {
 	pub fn draw(&mut self, canvas: &mut graphics::Canvas, scale_factor: f32) {
-		for (id, mesh) in self.paint_jobs.iter() {
+		for (id, mesh, clip) in self.paint_jobs.iter() {
+			canvas.set_scissor_rect(*clip).unwrap();
 			canvas.draw_textured_mesh(
 				mesh.clone(),
 				self.textures[&id].clone(),
 				graphics::DrawParam::default().scale([scale_factor, scale_factor]),
 			);
 		}
+		canvas.set_default_scissor_rect();
 		self.paint_jobs.clear();
 	}
 
@@ -29,7 +31,7 @@ impl Painter {
 		}
 
 		// generating meshes
-		for egui::ClippedPrimitive { primitive, .. } in self.shapes.iter() {
+		for egui::ClippedPrimitive { primitive, clip_rect } in self.shapes.iter() {
 			match primitive {
 				egui::epaint::Primitive::Mesh(mesh) => {
 					if mesh.vertices.len() < 3 {
@@ -55,6 +57,12 @@ impl Painter {
 								indices: mesh.indices.as_slice(),
 							},
 						),
+						graphics::Rect::new(
+							clip_rect.min.x,
+							clip_rect.min.y,
+							clip_rect.max.x - clip_rect.min.x,
+							clip_rect.max.y - clip_rect.min.y,
+						)
 					));
 				}
 				egui::epaint::Primitive::Callback(_) => {
