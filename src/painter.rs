@@ -31,7 +31,11 @@ impl Painter {
 		}
 
 		// generating meshes
-		for egui::ClippedPrimitive { primitive, clip_rect } in self.shapes.iter() {
+		for egui::ClippedPrimitive {
+			primitive,
+			clip_rect,
+		} in self.shapes.iter()
+		{
 			match primitive {
 				egui::epaint::Primitive::Mesh(mesh) => {
 					if mesh.vertices.len() < 3 {
@@ -62,7 +66,7 @@ impl Painter {
 							clip_rect.min.y,
 							clip_rect.max.x - clip_rect.min.x,
 							clip_rect.max.y - clip_rect.min.y,
-						)
+						),
 					));
 				}
 				egui::epaint::Primitive::Callback(_) => {
