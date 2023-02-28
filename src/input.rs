@@ -58,7 +58,7 @@ impl Input {
 			.push(egui::Event::PointerMoved(self.pointer_pos));
 
 		for button in [MouseButton::Left, MouseButton::Middle, MouseButton::Right] {
-			if ctx.mouse.button_pressed(button) {
+			if ctx.mouse.button_just_pressed(button) {
 				self.raw.events.push(egui::Event::PointerButton {
 					button: match button {
 						MouseButton::Left => PointerButton::Primary,
@@ -70,7 +70,7 @@ impl Input {
 					pressed: true,
 					modifiers: translate_modifier(ctx.keyboard.active_mods()),
 				});
-			} else {
+			} else if ctx.mouse.button_just_released(button) {
 				self.raw.events.push(egui::Event::PointerButton {
 					button: match button {
 						MouseButton::Left => PointerButton::Primary,
