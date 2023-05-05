@@ -103,6 +103,7 @@ impl Gui {
 	pub fn update(&mut self, ctx: &mut ggez::Context) {
 		self.input.update(ctx);
 		self.painter.lock().unwrap().update(ctx);
+		self.input.set_scale_factor(1.0, ctx.gfx.size());
 	}
 
 	/// Return an [`EguiContext`] for update the gui
