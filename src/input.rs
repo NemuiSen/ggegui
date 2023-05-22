@@ -45,6 +45,7 @@ impl Input {
 				self.raw.events.push(egui::Event::Key {
 					key,
 					pressed: true,
+					repeat: false,
 					modifiers: translate_modifier(ctx.keyboard.active_mods()),
 				})
 			}
