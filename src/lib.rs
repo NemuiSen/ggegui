@@ -46,39 +46,39 @@ impl Drop for GuiContext {
 /// ```
 /// use ggegui::{egui, Gui};
 /// struct State {
-/// 	gui: Gui,
+///     gui: Gui,
 /// }
 ///
 /// impl State {
-/// 	pub fn new(ctx: &mut Context) -> Self {
-/// 		Self {
-/// 			gui: Gui::new(ctx),
-/// 		}
-/// 	}
+///     pub fn new(ctx: &mut Context) -> Self {
+///         Self {
+///             gui: Gui::new(ctx),
+///         }
+///     }
 /// }
 ///
 /// impl EventHandler for State {
-/// 	fn update(&mut self, ctx: &mut Context) -> GameResult {
-/// 		let gui_ctx = self.gui.ctx();
+///     fn update(&mut self, ctx: &mut Context) -> GameResult {
+///         let gui_ctx = self.gui.ctx();
 ///
-/// 		egui::Window::new("Title").show(&gui_ctx, |ui| {
-/// 			ui.label("label");
-/// 			if ui.button("button").clicked() {
-/// 				println!("button clicked");
-/// 			}
-/// 		});
-///			self.gui.update(ctx);
-/// 		Ok(())
-/// 	}
+///         egui::Window::new("Title").show(&gui_ctx, |ui| {
+///             ui.label("label");
+///             if ui.button("button").clicked() {
+///                 println!("button clicked");
+///             }
+///         });
+///            self.gui.update(ctx);
+///         Ok(())
+///     }
 ///
-/// 	fn draw(&mut self, ctx: &mut Context) -> GameResult {
-/// 		let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
-/// 		canvas.draw(
-/// 			&self.egui_backend,
-/// 			DrawParam::default().dest(glam::Vec2::ZERO),
-/// 		);
-/// 		canvas.finish(ctx)
-/// 	}
+///     fn draw(&mut self, ctx: &mut Context) -> GameResult {
+///         let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
+///         canvas.draw(
+///             &self.egui_backend,
+///             DrawParam::default().dest(glam::Vec2::ZERO),
+///         );
+///         canvas.finish(ctx)
+///     }
 /// }
 /// ```
 #[derive(Default)]
@@ -102,8 +102,11 @@ impl Gui {
 
 	pub fn update(&mut self, ctx: &mut ggez::Context) {
 		self.input.update(ctx);
-		self.painter.lock().unwrap().update(ctx);
-		self.input.set_scale_factor(1.0, ctx.gfx.size());
+		self.painter
+			.lock()
+			.unwrap()
+			.update(ctx, self.input.scale_factor);
+		// self.input.set_scale_factor(1.0, ctx.gfx.size());
 	}
 
 	/// Return an [`EguiContext`] for update the gui
