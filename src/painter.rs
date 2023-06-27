@@ -16,7 +16,7 @@ impl Painter {
 			canvas.set_scissor_rect(*clip).unwrap();
 			canvas.draw_textured_mesh(
 				mesh.clone(),
-				self.textures[&id].clone(),
+				self.textures[id].clone(),
 				graphics::DrawParam::default().scale([scale_factor, scale_factor]),
 			);
 		}
@@ -24,7 +24,7 @@ impl Painter {
 		self.paint_jobs.clear();
 	}
 
-	pub fn update(&mut self, ctx: &mut ggez::Context) {
+	pub fn update(&mut self, ctx: &mut ggez::Context, scale_factor: f32) {
 		// Create and free textures
 		while let Some(textures_delta) = self.textures_delta.pop_front() {
 			self.update_textures(ctx, textures_delta);
@@ -62,10 +62,10 @@ impl Painter {
 							},
 						),
 						graphics::Rect::new(
-							clip_rect.min.x,
-							clip_rect.min.y,
-							clip_rect.max.x - clip_rect.min.x,
-							clip_rect.max.y - clip_rect.min.y,
+							clip_rect.min.x * scale_factor,
+							clip_rect.min.y * scale_factor,
+							(clip_rect.max.x - clip_rect.min.x) * scale_factor,
+							(clip_rect.max.y - clip_rect.min.y) * scale_factor,
 						),
 					));
 				}
