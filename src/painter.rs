@@ -1,6 +1,6 @@
 use std::collections::{HashMap, LinkedList};
 
-use ggez::graphics;
+use ggez::graphics::{self, BlendComponent, BlendFactor, BlendMode, BlendOperation};
 
 #[derive(Default, Clone)]
 pub struct Painter {
@@ -12,6 +12,19 @@ pub struct Painter {
 
 impl Painter {
 	pub fn draw(&mut self, canvas: &mut graphics::Canvas, scale_factor: f32) {
+		let prev_blend = canvas.blend_mode();
+		canvas.set_blend_mode(BlendMode {
+			color: BlendComponent {
+				src_factor: BlendFactor::One,
+				dst_factor: BlendFactor::OneMinusSrcAlpha,
+				operation: BlendOperation::Add,
+			},
+			alpha: BlendComponent {
+				src_factor: BlendFactor::OneMinusDstAlpha,
+				dst_factor: BlendFactor::One,
+				operation: BlendOperation::Add,
+			},
+		});
 		for (id, mesh, clip) in self.paint_jobs.iter() {
 			canvas.set_scissor_rect(*clip).unwrap();
 			canvas.draw_textured_mesh(
@@ -22,6 +35,7 @@ impl Painter {
 		}
 		canvas.set_default_scissor_rect();
 		self.paint_jobs.clear();
+		canvas.set_blend_mode(prev_blend);
 	}
 
 	pub fn update(&mut self, ctx: &mut ggez::Context, scale_factor: f32) {
@@ -131,8 +145,7 @@ fn font_to_image(font: &egui::FontImage, ctx: &mut ggez::Context) -> graphics::I
 
 	let mut pixels: Vec<u8> = Vec::with_capacity(font.pixels.len() * 4);
 
-	let gamma = 1.0;
-	for pixel in font.srgba_pixels(Some(gamma)) {
+	for pixel in font.srgba_pixels(None) {
 		pixels.extend(pixel.to_array());
 	}
 
