@@ -83,6 +83,10 @@ impl Painter {
 	) {
 		// set textures
 		for (id, delta) in &textures_delta.set {
+			if delta.pos.is_some() {
+				eprintln!("Error: Non-zero offset texture updates are not implemented yet");
+				continue;
+			}
 			let image = match &delta.image {
 				egui::ImageData::Color(image) => color_to_image(image, ctx),
 				egui::ImageData::Font(image) => font_to_image(image, ctx),
