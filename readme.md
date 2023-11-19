@@ -55,4 +55,4 @@ impl EventHandler for State {
 }
 ```
 
-there are a few [examples](./examples/) to know how to use this implementation.
+there are a few [examples](./examples/) to show how to use this implementation.
