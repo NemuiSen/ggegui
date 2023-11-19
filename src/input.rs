@@ -41,10 +41,11 @@ impl Input {
 	pub fn update(&mut self, ctx: &ggez::Context) {
 		/*======================= Keyboard =======================*/
 		for key in ctx.keyboard.pressed_keys() {
+			let pressed = ctx.keyboard.is_key_just_pressed(*key);
 			if let Some(key) = translate_keycode(*key) {
 				self.raw.events.push(egui::Event::Key {
 					key,
-					pressed: true,
+					pressed,
 					repeat: false,
 					modifiers: translate_modifier(ctx.keyboard.active_mods()),
 				})
