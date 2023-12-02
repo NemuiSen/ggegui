@@ -41,10 +41,6 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
 
-      - name: Install Packages needed (Linux)
-        if: ${{ runs-on == ubuntu-latest }}
-        run: sudo apt-get install -y libsdl2-dev
-
       - name: Check
         run: ci/check.sh
         shell: bash
