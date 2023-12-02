@@ -19,6 +19,8 @@ jobs:
         with:
           components: rustfmt
 
+      - name: Install Packages needed
+        run: sudo apt-get install -y libsdl2-dev
       - name: Check format
         run: ci/fmt.sh
 
