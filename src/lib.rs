@@ -33,7 +33,7 @@ impl Drop for GuiContext {
 		let egui::FullOutput {
 			textures_delta,
 			shapes,
-			pixels_per_point
+			pixels_per_point,
 			..
 		} = self.context.end_frame();
 
