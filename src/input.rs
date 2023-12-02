@@ -92,7 +92,6 @@ impl Input {
 	/// Set the scale_factor and update the screen_rect
 	pub fn set_scale_factor(&mut self, scale_factor: f32, (w, h): (f32, f32)) {
 		self.scale_factor = scale_factor;
-		self.raw.pixels_per_point = Some(scale_factor);
 		self.resize_event(w, h);
 	}
 

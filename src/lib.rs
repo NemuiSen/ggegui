@@ -38,10 +38,8 @@ impl Drop for GuiContext {
 		} = self.context.end_frame();
 
 		let mut painter = self.painter.lock().unwrap();
-		painter.shapes = self.context.tessellate(shapes);
-		painter
-			.textures_delta
-			.push_front(textures_delta, pixels_per_point);
+		painter.shapes = self.context.tessellate(shapes, pixels_per_point);
+		painter.textures_delta.push_front(textures_delta);
 	}
 }
 
