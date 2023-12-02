@@ -83,9 +83,9 @@ impl EventHandler<ggez::GameError> for MyGame {
 				self.curret_element = String::new();
 			}
 
-			if self.elements.len() > 0 {
+			if !self.elements.is_empty() {
 				let elements = self.elements.clone();
-				for (id, _element) in &elements.clone() {
+				for id in elements.keys() {
 					ui.horizontal(|ui| {
 						let selected = self.curret_element == *id;
 						if ui
@@ -136,7 +136,7 @@ impl EventHandler<ggez::GameError> for MyGame {
 
 	fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult {
 		let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
-		for (_, element) in &self.elements {
+		for element in self.elements.values() {
 			canvas.draw(element, DrawParam::default());
 		}
 		canvas.draw(&self.gui, DrawParam::default());
