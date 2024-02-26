@@ -45,7 +45,7 @@ impl Input {
 				if let Some(key) = translate_keycode(*key) {
 					self.raw.events.push(egui::Event::Key {
 						key,
-                        physical_key: None,
+						physical_key: None,
 						pressed: true,
 						repeat: false,
 						modifiers: translate_modifier(ctx.keyboard.active_mods()),
