@@ -2,4 +2,4 @@
 
 set -ex
 
-cargo clippy --workspace --all-targets --all-features --offline -- -D warnings
+cargo clippy --workspace --all-targets --all-features -- -D warnings
