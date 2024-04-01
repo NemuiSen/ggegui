@@ -15,4 +15,4 @@ egui = "0.26.2"
 ggez = "0.9.1"
 
 [dev-dependencies]
-egui_demo_lib = "0.26"
+egui_demo_lib = "0.27"
